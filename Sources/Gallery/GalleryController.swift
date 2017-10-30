@@ -1,4 +1,6 @@
 import UIKit
+import Photos
+import MobileCoreServices
 import AVFoundation
 
 public protocol GalleryControllerDelegate: class {
@@ -6,13 +8,14 @@ public protocol GalleryControllerDelegate: class {
   func galleryController(_ controller: GalleryController, didSelectImages images: [Image])
   func galleryController(_ controller: GalleryController, didSelectVideo video: Video)
   func galleryController(_ controller: GalleryController, requestLightbox images: [Image])
+  func galleryController(_ controller: GalleryController, image: UIImage?, url: URL?)
   func galleryControllerDidCancel(_ controller: GalleryController)
 }
 
 public class GalleryController: UIViewController, PermissionControllerDelegate {
 
   lazy var imagesController: ImagesController = self.makeImagesController()
-  lazy var cameraController: CameraController = self.makeCameraController()
+  lazy var cameraController: UIImagePickerController = self.makeCameraController()
   lazy var videosController: VideosController = self.makeVideosController()
 
   lazy var pagesController: PagesController = self.makePagesController()
@@ -68,12 +71,14 @@ public class GalleryController: UIViewController, PermissionControllerDelegate {
     return controller
   }
 
-  func makeCameraController() -> CameraController {
-    let controller = CameraController(cart: cart)
-    controller.title = "Gallery.Camera.Title".g_localize(fallback: "CAMERA")
-
-    return controller
-  }
+    func makeCameraController() -> UIImagePickerController {
+        let controller =  UIImagePickerController()
+        controller.delegate = self
+        controller.sourceType = .camera
+        controller.mediaTypes = [kUTTypeMovie as String,kUTTypeImage as String]
+        controller.title = "Gallery.Camera.Title".g_localize(fallback: "CAMERA")
+        return controller
+    }
 
   func makeVideosController() -> VideosController {
     let controller = VideosController(cart: cart)
@@ -151,4 +156,26 @@ public class GalleryController: UIViewController, PermissionControllerDelegate {
     showMain()
     permissionController.g_removeFromParentController()
   }
+}
+
+
+extension GalleryController: UIImagePickerControllerDelegate, UINavigationControllerDelegate  {
+    
+    //MARK: - Done image capture here
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
+            UIImageWriteToSavedPhotosAlbum(image, self, nil, nil)
+            self.delegate?.galleryController(self, image: image, url: nil)
+        }else {
+            let url = info[UIImagePickerControllerMediaURL] as! URL
+            UISaveVideoAtPathToSavedPhotosAlbum(url.absoluteString, self, nil, nil)
+            self.delegate?.galleryController(self, image: nil, url: url)
+        }
+    }
+    
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
 }
