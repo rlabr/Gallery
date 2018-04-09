@@ -69,45 +69,58 @@ class PagesController: UIViewController {
   // MARK: - Setup
 
   func setup() {
-    let usePageIndicator = controllers.count > 1
-    if usePageIndicator {
-      view.addSubview(pageIndicator)
-    }
-    view.addSubview(scrollView)
-    scrollView.addSubview(scrollViewContentView)
-
-    pageIndicator.g_pinDownward()
-    pageIndicator.g_pin(height: 40)
-
-    scrollView.g_pinUpward()
-    if usePageIndicator {
-      scrollView.g_pin(on: .bottom, view: pageIndicator, on: .top)
-    } else {
-      scrollView.g_pinDownward()
-    }
-
-    scrollViewContentView.g_pinEdges()
-
-    for (i, controller) in controllers.enumerated() {
-      addChildViewController(controller)
-      scrollViewContentView.addSubview(controller.view)
-      controller.didMove(toParentViewController: self)
-
-      controller.view.g_pin(on: .top)
-      controller.view.g_pin(on: .bottom)
-      controller.view.g_pin(on: .width, view: scrollView)
-      controller.view.g_pin(on: .height, view: scrollView)
-
-      if i == 0 {
-        controller.view.g_pin(on: .left)
-      } else {
-        controller.view.g_pin(on: .left, view: self.controllers[i-1].view, on: .right)
-      }
-
-      if i == self.controllers.count - 1 {
-        controller.view.g_pin(on: .right)
-      }
-    }
+        let usePageIndicator = controllers.count > 1
+        if usePageIndicator {
+            view.addSubview(pageIndicator)
+            Constraint.on(
+                pageIndicator.leftAnchor.constraint(equalTo: pageIndicator.superview!.leftAnchor),
+                pageIndicator.rightAnchor.constraint(equalTo: pageIndicator.superview!.rightAnchor),
+                pageIndicator.heightAnchor.constraint(equalToConstant: 40)
+            )
+            
+            if #available(iOS 11, *) {
+                Constraint.on(
+                    pageIndicator.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+                )
+            } else {
+                Constraint.on(
+                    pageIndicator.bottomAnchor.constraint(equalTo: pageIndicator.superview!.bottomAnchor)
+                )
+            }
+        }
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(scrollViewContentView)
+        
+        scrollView.g_pinUpward()
+        if usePageIndicator {
+            scrollView.g_pin(on: .bottom, view: pageIndicator, on: .top)
+        } else {
+            scrollView.g_pinDownward()
+        }
+        
+        scrollViewContentView.g_pinEdges()
+        
+        for (i, controller) in controllers.enumerated() {
+            addChildViewController(controller)
+            scrollViewContentView.addSubview(controller.view)
+            controller.didMove(toParentViewController: self)
+            
+            controller.view.g_pin(on: .top)
+            controller.view.g_pin(on: .bottom)
+            controller.view.g_pin(on: .width, view: scrollView)
+            controller.view.g_pin(on: .height, view: scrollView)
+            
+            if i == 0 {
+                controller.view.g_pin(on: .left)
+            } else {
+                controller.view.g_pin(on: .left, view: self.controllers[i-1].view, on: .right)
+            }
+            
+            if i == self.controllers.count - 1 {
+                controller.view.g_pin(on: .right)
+            }
+        }
   }
 
   // MARK: - Index
