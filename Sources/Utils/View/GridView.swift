@@ -29,43 +29,54 @@ class GridView: UIView {
   // MARK: - Setup
 
   func setup() {
-    backgroundColor = UIColor.lightGray.withAlphaComponent(0.5)
-
-    [collectionView, bottomView, topView, emptyView].forEach {
-      addSubview($0)
+        [collectionView, bottomView, topView, emptyView].forEach {
+            addSubview($0)
+        }
+        
+        [closeButton, arrowButton].forEach {
+            topView.addSubview($0)
+        }
+        
+        [bottomBlurView, doneButton].forEach {
+            bottomView.addSubview($0 as! UIView)
+        }
+        
+        Constraint.on(
+            topView.leftAnchor.constraint(equalTo: topView.superview!.leftAnchor),
+            topView.rightAnchor.constraint(equalTo: topView.superview!.rightAnchor),
+            topView.heightAnchor.constraint(equalToConstant: 40)
+        )
+        
+        if #available(iOS 11, *) {
+            Constraint.on(
+                topView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor)
+            )
+        } else {
+            Constraint.on(
+                topView.topAnchor.constraint(equalTo: topView.superview!.topAnchor)
+            )
+        }
+        
+        bottomView.g_pinDownward()
+        bottomView.g_pin(height: 80)
+        
+        emptyView.g_pinEdges(view: collectionView)
+        
+        collectionView.g_pinDownward()
+        collectionView.g_pin(on: .top, view: topView, on: .bottom, constant: 1)
+        
+        bottomBlurView.g_pinEdges()
+        
+        closeButton.g_pin(on: .top)
+        closeButton.g_pin(on: .left)
+        closeButton.g_pin(size: CGSize(width: 40, height: 40))
+        
+        arrowButton.g_pinCenter()
+        arrowButton.g_pin(height: 40)
+        
+        doneButton.g_pin(on: .centerY)
+        doneButton.g_pin(on: .right, constant: -38)
     }
-
-    [closeButton, arrowButton].forEach {
-      topView.addSubview($0)
-    }
-
-    [bottomBlurView, doneButton].forEach {
-      bottomView.addSubview($0 as! UIView)
-    }
-
-    topView.g_pinUpward()
-    topView.g_pin(height: 40)
-    bottomView.g_pinDownward()
-    bottomView.g_pin(height: 80)
-
-    emptyView.g_pinEdges(view: collectionView)
-    collectionView.g_pin(on: .left)
-    collectionView.g_pin(on: .right)
-    collectionView.g_pin(on: .bottom)
-    collectionView.g_pin(on: .top, view: topView, on: .bottom, constant: 1)
-
-    bottomBlurView.g_pinEdges()
-
-    closeButton.g_pin(on: .top)
-    closeButton.g_pin(on: .left)
-    closeButton.g_pin(size: CGSize(width: 40, height: 40))
-
-    arrowButton.g_pinCenter()
-    arrowButton.g_pin(height: 40)
-
-    doneButton.g_pin(on: .centerY)
-    doneButton.g_pin(on: .right, constant: -38)
-  }
 
   // MARK: - Controls
 
