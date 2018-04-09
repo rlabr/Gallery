@@ -41,59 +41,69 @@ class CameraView: UIView, UIGestureRecognizerDelegate {
   // MARK: - Setup
 
   func setup() {
-    addGestureRecognizer(tapGR)
-
-    [closeButton, flashButton, rotateButton, bottomContainer].forEach {
-      addSubview($0)
+        addGestureRecognizer(tapGR)
+        
+        [closeButton, flashButton, rotateButton, bottomContainer].forEach {
+            addSubview($0)
+        }
+        
+        [bottomView, shutterButton].forEach {
+            bottomContainer.addSubview($0)
+        }
+        
+        [stackView, doneButton].forEach {
+            bottomView.addSubview($0 as! UIView)
+        }
+        
+        [closeButton, flashButton, rotateButton].forEach {
+            $0.g_addShadow()
+        }
+        
+        rotateOverlayView.addSubview(blurView)
+        insertSubview(rotateOverlayView, belowSubview: rotateButton)
+        insertSubview(focusImageView, belowSubview: bottomContainer)
+        insertSubview(shutterOverlayView, belowSubview: bottomContainer)
+        
+        closeButton.g_pin(on: .left)
+        closeButton.g_pin(size: CGSize(width: 44, height: 44))
+        
+        flashButton.g_pin(on: .centerY, view: closeButton)
+        flashButton.g_pin(on: .centerX)
+        flashButton.g_pin(size: CGSize(width: 60, height: 44))
+        
+        rotateButton.g_pin(on: .right)
+        rotateButton.g_pin(size: CGSize(width: 44, height: 44))
+        
+        if #available(iOS 11, *) {
+            Constraint.on(
+                closeButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
+                rotateButton.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor)
+            )
+        } else {
+            Constraint.on(
+                closeButton.topAnchor.constraint(equalTo: topAnchor),
+                rotateButton.topAnchor.constraint(equalTo: topAnchor)
+            )
+        }
+        
+        bottomContainer.g_pinDownward()
+        bottomContainer.g_pin(height: 80)
+        bottomView.g_pinEdges()
+        
+        stackView.g_pin(on: .centerY, constant: -4)
+        stackView.g_pin(on: .left, constant: 38)
+        stackView.g_pin(size: CGSize(width: 56, height: 56))
+        
+        shutterButton.g_pinCenter()
+        shutterButton.g_pin(size: CGSize(width: 60, height: 60))
+        
+        doneButton.g_pin(on: .centerY)
+        doneButton.g_pin(on: .right, constant: -38)
+        
+        rotateOverlayView.g_pinEdges()
+        blurView.g_pinEdges()
+        shutterOverlayView.g_pinEdges()
     }
-
-    [bottomView, shutterButton].forEach {
-      bottomContainer.addSubview($0)
-    }
-
-    [stackView, doneButton].forEach {
-      bottomView.addSubview($0 as! UIView)
-    }
-
-    [closeButton, flashButton, rotateButton].forEach {
-      $0.g_addShadow()
-    }
-
-    rotateOverlayView.addSubview(blurView)
-    insertSubview(rotateOverlayView, belowSubview: rotateButton)
-    insertSubview(focusImageView, belowSubview: bottomContainer)
-    insertSubview(shutterOverlayView, belowSubview: bottomContainer)
-
-    closeButton.g_pin(on: .top)
-    closeButton.g_pin(on: .left)
-    closeButton.g_pin(size: CGSize(width: 44, height: 44))
-
-    flashButton.g_pin(on: .centerY, view: closeButton)
-    flashButton.g_pin(on: .centerX)
-    flashButton.g_pin(size: CGSize(width: 60, height: 44))
-
-    rotateButton.g_pin(on: .top)
-    rotateButton.g_pin(on: .right)
-    rotateButton.g_pin(size: CGSize(width: 44, height: 44))
-
-    bottomContainer.g_pinDownward()
-    bottomContainer.g_pin(height: 80)
-    bottomView.g_pinEdges()
-
-    stackView.g_pin(on: .centerY, constant: -4)
-    stackView.g_pin(on: .left, constant: 38)
-    stackView.g_pin(size: CGSize(width: 56, height: 56))
-
-    shutterButton.g_pinCenter()
-    shutterButton.g_pin(size: CGSize(width: 60, height: 60))
-    
-    doneButton.g_pin(on: .centerY)
-    doneButton.g_pin(on: .right, constant: -38)
-
-    rotateOverlayView.g_pinEdges()
-    blurView.g_pinEdges()
-    shutterOverlayView.g_pinEdges()
-  }
 
   func setupPreviewLayer(_ session: AVCaptureSession) {
     guard previewLayer == nil else { return }
