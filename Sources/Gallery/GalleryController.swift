@@ -75,7 +75,7 @@ public class GalleryController: UIViewController, PermissionControllerDelegate {
         let controller =  UIImagePickerController()
         controller.delegate = self
         controller.sourceType = .camera
-        controller.mediaTypes = [kUTTypeMovie as String,kUTTypeImage as String]
+        controller.mediaTypes = UIImagePickerController.availableMediaTypes(for: controller.sourceType)!
         controller.title = "Gallery.Camera.Title".g_localize(fallback: "CAMERA")
         return controller
     }
